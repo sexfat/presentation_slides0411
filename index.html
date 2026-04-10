@@ -396,6 +396,27 @@
     }
 
     /* ── Code Block ───────────────────────────────────────────── */
+    .figma-link {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      margin-top: .7rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .6rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      text-decoration: none;
+      border: 1px solid var(--cyan-dim);
+      padding: .3rem .7rem;
+      border-radius: 4px;
+      transition: background .2s, border-color .2s;
+    }
+    .figma-link:hover {
+      background: var(--cyan-dim);
+      border-color: var(--cyan);
+    }
+
     .code-block {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -756,44 +777,94 @@
     <div class="deco-line"></div>
     <p class="eyebrow">第一階段 · 需求探討</p>
     <hr class="rule" />
-    <h2 class="title-lg">讓 AI 陪你<br/><span class="accent">把模糊變清晰</span></h2>
-    <div class="grid-2" style="margin-top:1.5rem; align-items:start">
+    <h2 class="title-lg">從原始數據到<br/><span class="accent">行為洞察</span></h2>
+    <p class="subtitle" style="margin-bottom:1.2rem">AI 擔任「UX 研究員」，處理大量非結構化資訊，找出真正的 User Needs</p>
+    <div class="grid-2" style="align-items:start">
       <div>
-        <div class="highlight-box">
-          <div class="label">做法</div>
-          <p class="body-text">用對話式 prompt 引導 AI 扮演「挑剔的 PM」，不斷追問使用情境、邊界條件與成功指標</p>
+        <div class="highlight-box" style="margin-bottom:.8rem">
+          <div class="label">關鍵技術 · 逐字稿精煉術</div>
+          <p class="body-text">AI 識別使用者旅程中的關鍵 Touchpoints，自動生成初步的使用者旅程地圖（User Journey Map）</p>
         </div>
-        <div class="highlight-box amber" style="margin-top:1rem">
+        <div class="highlight-box amber" style="margin-bottom:.8rem">
+          <div class="label">核心價值</div>
+          <p class="body-text">「聽完訪談」→「產出 Insight」<br/>從數天縮短至<strong style="color:var(--amber)">數分鐘</strong></p>
+        </div>
+        <div class="highlight-box">
           <div class="label">產出</div>
-          <p class="body-text">User Story、驗收條件（AC）、技術可行性初評、風險清單</p>
+          <p class="body-text">核心活動的顧客旅程地圖，從旅程地圖裡發現<strong style="color:var(--cyan)">痛點</strong>與<strong style="color:var(--cyan)">甜蜜點</strong></p>
         </div>
       </div>
-      <div class="code-block">
-<span class="comment"># 範例 Prompt 框架</span>
-<span class="key">角色：</span><span class="val">你是一位資深 PM，</span>
-        習慣用 5 Whys 追問需求。
-
-<span class="key">任務：</span><span class="val">幫我將以下模糊需求</span>
-        整理成結構化 User Story：
-
-<span class="comment">「用戶希望可以查詢歷史訂單」</span>
-
-<span class="key">格式：</span>
-  - As a ...
-  - I want to ...
-  - So that ...
-  - AC: Given / When / Then
+      <div>
+        <div class="highlight-box" style="border-left-color:var(--text-dim); margin-bottom:.8rem">
+          <div class="label" style="color:var(--text-dim)">前言框架</div>
+          <p class="body-text" style="font-size:.82rem">先了解資訊架構的五層定義——每層的變動會對體驗產生什麼連鎖影響</p>
+          <a href="https://www.figma.com/board/oShrV1T19vwIpaAjDRfYIg/%E8%B3%87%E8%A8%8A%E6%9E%B6%E6%A7%8B%E4%BA%94%E5%B1%A4%E5%AE%9A%E7%BE%A9?node-id=0-1&t=dQ97V2ywJQLP48dg-1" target="_blank" rel="noopener" class="figma-link">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            查看 Figma 圖板
+          </a>
+        </div>
+        <div class="highlight-box amber">
+          <div class="label">實作要點</div>
+          <p class="body-text" style="font-size:.82rem">從訪談逐字稿中找出<strong style="color:var(--amber)">動詞</strong>——有動詞就有服務接觸的可能性，進而發現活動與互動點</p>
+        </div>
       </div>
     </div>
     <div class="slide-num">05 / 10</div>
   </div>
 
 <!-- ═══════════════════════════════════════════
-     SLIDE 6 — DEVELOPMENT PHASE
+     SLIDE 6 — CORE DEFINITION PHASE
 ════════════════════════════════════════════ -->
   <div class="slide" id="slide-6">
     <div class="deco-line"></div>
-    <p class="eyebrow">第二階段 · 開發執行</p>
+    <p class="eyebrow">第二階段 · 核心定義</p>
+    <hr class="rule" />
+    <h2 class="title-lg">從需求分析到<br/><span class="accent">功能規劃</span></h2>
+    <p class="subtitle" style="margin-bottom:1.2rem">AI 擔任「產品經理 PM」——有了洞察後，確保開發的東西是市場要的</p>
+    <div class="grid-2" style="align-items:start">
+      <ul class="styled-list">
+        <li>
+          <div>
+            <strong style="color:var(--text)">分析需求</strong><br/>
+            <span style="font-size:.82rem">評估哪些需求最重要，將需求轉化成功能</span>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong style="color:var(--text)">架構設計</strong><br/>
+            <span style="font-size:.82rem">評估技術線、繪製系統圖、提出 tradeoffs</span>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong style="color:var(--text)">User Stories 與 PRD 生成</strong><br/>
+            <span style="font-size:.82rem">AI 撰寫完整且邏輯嚴密的開發規格 spec，避免溝通落差</span>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong style="color:var(--text)">功能地圖 Sitemap / Flow</strong><br/>
+            <span style="font-size:.82rem">快速產出功能架構與邏輯流程</span>
+          </div>
+        </li>
+      </ul>
+      <div class="highlight-box amber">
+        <div class="label">AI 代理的角色</div>
+        <p class="body-text" style="font-size:.9rem; margin-bottom:.8rem">產品經理 (PM)</p>
+        <hr class="rule-wide" style="margin:.6rem 0" />
+        <div class="label">核心價值</div>
+        <p class="body-text" style="font-size:.82rem">將模糊的使用者洞察轉化為可執行的開發規格，讓工程師與設計師有共同的語言</p>
+      </div>
+    </div>
+    <div class="slide-num">06 / 10</div>
+  </div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 7 — DEVELOPMENT PHASE (原第二階段)
+════════════════════════════════════════════ -->
+  <div class="slide" id="slide-7">
+    <div class="deco-line"></div>
+    <p class="eyebrow">第三階段 · 開發執行</p>
     <hr class="rule" />
     <h2 class="title-lg">AI 扮演<br/><span class="accent">你的全端工程師</span></h2>
     <ul class="styled-list" style="margin-top:1.5rem; max-width:700px">
@@ -803,43 +874,6 @@
       <li><strong style="color:var(--text)">測試撰寫</strong> — 根據 AC 生成單元測試、整合測試</li>
       <li><strong style="color:var(--text)">文件同步</strong> — 隨程式碼更新自動補全 README / API doc</li>
     </ul>
-    <div class="slide-num">06 / 10</div>
-  </div>
-
-<!-- ═══════════════════════════════════════════
-     SLIDE 7 — TOOLS
-════════════════════════════════════════════ -->
-  <div class="slide" id="slide-7">
-    <div class="deco-line"></div>
-    <p class="eyebrow">工具生態</p>
-    <hr class="rule" />
-    <h2 class="title-lg">這一套<br/><span class="accent">工具鏈長什麼樣</span></h2>
-    <div class="grid-3" style="margin-top:1.5rem">
-      <div class="card">
-        <div class="card-title" style="color:var(--cyan)">Claude Code</div>
-        <div class="card-body">直接在 terminal 操作程式碼庫，支援 Agent 模式與 MCP 工具串接</div>
-      </div>
-      <div class="card amber">
-        <div class="card-title" style="color:var(--amber)">Cursor / Windsurf</div>
-        <div class="card-body">IDE 內嵌 AI，有感知整個 repo 上下文的能力</div>
-      </div>
-      <div class="card">
-        <div class="card-title" style="color:var(--cyan)">MCP Servers</div>
-        <div class="card-body">串接 GitHub、Figma、資料庫、API，讓 AI 有能力「動手做」</div>
-      </div>
-      <div class="card">
-        <div class="card-title" style="color:var(--cyan)">Notion AI / Linear</div>
-        <div class="card-body">需求管理與任務追蹤，與 AI Agent 雙向同步</div>
-      </div>
-      <div class="card amber">
-        <div class="card-title" style="color:var(--amber)">CI/CD + AI</div>
-        <div class="card-body">PR review bot、自動修 lint、部署前安全掃描</div>
-      </div>
-      <div class="card">
-        <div class="card-title" style="color:var(--cyan)">Observability</div>
-        <div class="card-body">AI 分析 log、預測異常、自動產出 incident report</div>
-      </div>
-    </div>
     <div class="slide-num">07 / 10</div>
   </div>
 
@@ -848,7 +882,7 @@
 ════════════════════════════════════════════ -->
   <div class="slide" id="slide-8">
     <div class="deco-line"></div>
-    <p class="eyebrow">第三階段 · 落地與維運</p>
+    <p class="eyebrow">第四階段 · 落地與維運</p>
     <hr class="rule" />
     <h2 class="title-lg">上線不是終點，<br/><span class="accent">是另一個迴圈的起點</span></h2>
     <div class="grid-2" style="margin-top:1.5rem; align-items:start">
