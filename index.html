@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>從需求探討到專案落地：AI 全程的代理助攻</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;900&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #09090f;
+      --bg2:       #0f0f1a;
+      --surface:   #13131f;
+      --border:    #1e1e30;
+      --cyan:      #00d4b8;
+      --cyan-dim:  #00d4b840;
+      --amber:     #f0a500;
+      --amber-dim: #f0a50025;
+      --text:      #e8e8f0;
+      --text-dim:  #6a6a88;
+      --text-mid:  #a0a0c0;
+      --accent-r:  #ff4d6d;
+
+      --slide-w: 100vw;
+      --slide-h: 100dvh;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', 'Noto Serif TC', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Deck Container ───────────────────────────────────────── */
+    #deck {
+      width: var(--slide-w);
+      height: var(--slide-h);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ── Slides ───────────────────────────────────────────────── */
+    .slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: clamp(2rem, 6vw, 5rem) clamp(2rem, 8vw, 7rem);
+      opacity: 0;
+      transform: translateX(60px);
+      transition: opacity .55s cubic-bezier(.4,0,.2,1),
+                  transform .55s cubic-bezier(.4,0,.2,1);
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .slide.active {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: all;
+    }
+    .slide.prev {
+      opacity: 0;
+      transform: translateX(-60px);
+    }
+
+    /* ── Shared Background Decoration ────────────────────────── */
+    .slide::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 80% 20%, #00d4b808 0%, transparent 70%),
+        radial-gradient(ellipse 40% 60% at -10% 80%, #f0a50006 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Subtle noise */
+    .slide::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+      opacity: .4;
+      pointer-events: none;
+    }
+
+    /* ── Slide Number & Corner Tag ────────────────────────────── */
+    .slide-num {
+      position: absolute;
+      bottom: 2rem;
+      right: clamp(2rem, 6vw, 5rem);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .65rem;
+      letter-spacing: .15em;
+      color: var(--text-dim);
+      z-index: 10;
+    }
+
+    .corner-tag {
+      position: absolute;
+      top: 2rem;
+      right: clamp(2rem, 6vw, 5rem);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .6rem;
+      letter-spacing: .12em;
+      color: var(--cyan);
+      text-transform: uppercase;
+      z-index: 10;
+      opacity: .7;
+    }
+
+    /* ── Horizontal Rule / Separator ─────────────────────────── */
+    .rule {
+      width: 3rem;
+      height: 2px;
+      background: linear-gradient(90deg, var(--cyan), transparent);
+      margin-bottom: 1.5rem;
+      border: none;
+    }
+
+    .rule-wide {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, var(--border), transparent);
+      border: none;
+      margin: 1.5rem 0;
+    }
+
+    /* ── Typography ───────────────────────────────────────────── */
+    .eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(.6rem, 1.2vw, .75rem);
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 1.2rem;
+    }
+
+    .title-xl {
+      font-family: 'Noto Serif TC', serif;
+      font-weight: 900;
+      font-size: clamp(2.2rem, 5.5vw, 5rem);
+      line-height: 1.1;
+      letter-spacing: -.01em;
+      color: var(--text);
+      margin-bottom: 1.2rem;
+    }
+
+    .title-lg {
+      font-family: 'Noto Serif TC', serif;
+      font-weight: 900;
+      font-size: clamp(1.8rem, 4vw, 3.5rem);
+      line-height: 1.15;
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+
+    .title-md {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: clamp(1.2rem, 2.5vw, 2rem);
+      line-height: 1.3;
+      color: var(--text);
+      margin-bottom: .8rem;
+    }
+
+    .subtitle {
+      font-size: clamp(1rem, 1.8vw, 1.4rem);
+      color: var(--text-mid);
+      line-height: 1.6;
+      font-weight: 400;
+      max-width: 640px;
+    }
+
+    .body-text {
+      font-size: clamp(.85rem, 1.5vw, 1.05rem);
+      color: var(--text-mid);
+      line-height: 1.75;
+      max-width: 600px;
+    }
+
+    .accent { color: var(--cyan); }
+    .accent-amber { color: var(--amber); }
+    .accent-red { color: var(--accent-r); }
+
+    /* ── Highlight Box ────────────────────────────────────────── */
+    .highlight-box {
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--cyan);
+      background: var(--surface);
+      padding: 1.2rem 1.5rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1rem 0;
+      position: relative;
+      z-index: 1;
+    }
+    .highlight-box.amber {
+      border-left-color: var(--amber);
+    }
+    .highlight-box .label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .6rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: .4rem;
+    }
+    .highlight-box.amber .label { color: var(--amber); }
+
+    /* ── Grid Layouts ─────────────────────────────────────────── */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.2rem;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 1.4rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .25s;
+    }
+    .card:hover { border-color: var(--cyan-dim); }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--cyan), transparent);
+    }
+    .card.amber::before { background: linear-gradient(90deg, var(--amber), transparent); }
+
+    .card-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2rem;
+      font-weight: 300;
+      color: var(--cyan-dim);
+      line-height: 1;
+      margin-bottom: .6rem;
+    }
+    .card-num.amber { color: var(--amber-dim); }
+
+    .card-title {
+      font-size: clamp(.85rem, 1.4vw, 1rem);
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: .4rem;
+    }
+    .card-body {
+      font-size: clamp(.7rem, 1.1vw, .85rem);
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    /* ── List ─────────────────────────────────────────────────── */
+    .styled-list {
+      list-style: none;
+      position: relative;
+      z-index: 1;
+    }
+    .styled-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: .75rem;
+      font-size: clamp(.85rem, 1.4vw, 1rem);
+      color: var(--text-mid);
+      padding: .65rem 0;
+      border-bottom: 1px solid var(--border);
+      line-height: 1.5;
+    }
+    .styled-list li:last-child { border-bottom: none; }
+    .styled-list li::before {
+      content: '→';
+      color: var(--cyan);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .8rem;
+      margin-top: .05rem;
+      flex-shrink: 0;
+    }
+
+    /* ── Big Number / Stat ────────────────────────────────────── */
+    .stat-block {
+      display: flex;
+      flex-direction: column;
+      gap: .2rem;
+      position: relative;
+      z-index: 1;
+    }
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(3rem, 8vw, 6rem);
+      line-height: 1;
+      color: var(--cyan);
+    }
+    .stat-label {
+      font-size: clamp(.75rem, 1.3vw, .95rem);
+      color: var(--text-dim);
+      letter-spacing: .05em;
+    }
+
+    /* ── Quote ────────────────────────────────────────────────── */
+    .quote-block {
+      border-left: 3px solid var(--cyan);
+      padding: 1.2rem 2rem;
+      position: relative;
+      z-index: 1;
+    }
+    .quote-text {
+      font-family: 'Noto Serif TC', serif;
+      font-size: clamp(1.1rem, 2.5vw, 1.8rem);
+      font-weight: 600;
+      line-height: 1.5;
+      color: var(--text);
+      font-style: italic;
+    }
+    .quote-attr {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .7rem;
+      color: var(--text-dim);
+      letter-spacing: .1em;
+      margin-top: .8rem;
+    }
+
+    /* ── Timeline ─────────────────────────────────────────────── */
+    .timeline {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 5.5rem;
+      top: 0; bottom: 0;
+      width: 1px;
+      background: linear-gradient(to bottom, var(--cyan), var(--border), transparent);
+    }
+    .tl-item {
+      display: grid;
+      grid-template-columns: 5.5rem 1fr;
+      gap: 1.5rem;
+      padding: .8rem 0;
+      align-items: flex-start;
+    }
+    .tl-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .65rem;
+      letter-spacing: .1em;
+      color: var(--cyan);
+      text-align: right;
+      padding-right: 1.2rem;
+      line-height: 1.8;
+    }
+    .tl-content {
+      padding-left: 1rem;
+      border-left: none;
+    }
+    .tl-title {
+      font-size: clamp(.85rem, 1.4vw, 1rem);
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: .2rem;
+    }
+    .tl-body {
+      font-size: clamp(.75rem, 1.2vw, .85rem);
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    /* ── Code Block ───────────────────────────────────────────── */
+    .code-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.2rem 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(.65rem, 1.1vw, .8rem);
+      color: #a8d8b0;
+      line-height: 1.8;
+      position: relative;
+      z-index: 1;
+      overflow-x: auto;
+    }
+    .code-block .comment { color: var(--text-dim); }
+    .code-block .key { color: var(--cyan); }
+    .code-block .val { color: var(--amber); }
+
+    /* ── Slide-specific: Title ────────────────────────────────── */
+    #slide-1 {
+      background: var(--bg);
+      justify-content: center;
+      padding-top: clamp(3rem, 8vh, 5rem);
+      padding-bottom: clamp(2rem, 4vh, 3rem);
+    }
+    #slide-1 .bg-text {
+      position: absolute;
+      top: 50%;
+      right: -2%;
+      transform: translateY(-60%);
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(6rem, 18vw, 16rem);
+      color: #ffffff04;
+      line-height: 1;
+      letter-spacing: -.05em;
+      pointer-events: none;
+      user-select: none;
+      z-index: 0;
+    }
+    #slide-1 .meta-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 2rem;
+      margin-top: 2rem;
+      position: relative;
+      z-index: 1;
+      flex-wrap: wrap;
+    }
+    #slide-1 .meta-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .65rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      padding: .3rem .75rem;
+      border-radius: 4px;
+    }
+    #slide-1 .meta-tags {
+      display: flex;
+      gap: .6rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    #slide-1 .speaker-card {
+      border-left: 2px solid var(--cyan);
+      padding: .4rem 0 .4rem 1rem;
+    }
+    #slide-1 .speaker-name {
+      font-family: 'Noto Serif TC', serif;
+      font-weight: 900;
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      color: var(--text);
+      letter-spacing: .03em;
+    }
+    #slide-1 .speaker-role {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .65rem;
+      letter-spacing: .15em;
+      color: var(--cyan);
+      text-transform: uppercase;
+      margin-top: .25rem;
+    }
+    #slide-1 .speaker-org {
+      font-size: .78rem;
+      color: var(--text-mid);
+      margin-top: .2rem;
+    }
+    #slide-1 .speaker-bio {
+      font-size: .72rem;
+      color: var(--text-dim);
+      margin-top: .15rem;
+      font-style: italic;
+    }
+    #slide-1 .title-xl { position: relative; z-index: 1; }
+    #slide-1 .eyebrow { position: relative; z-index: 1; }
+    #slide-1 .rule { position: relative; z-index: 1; }
+
+    /* ── Large decorative line ────────────────────────────────── */
+    .deco-line {
+      position: absolute;
+      top: 0;
+      right: clamp(3rem, 15vw, 12rem);
+      width: 1px;
+      height: 100%;
+      background: linear-gradient(to bottom, transparent, var(--border) 30%, var(--border) 70%, transparent);
+      z-index: 0;
+    }
+
+    /* ── Progress Bar ─────────────────────────────────────────── */
+    #progress {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--cyan), var(--amber));
+      transition: width .4s ease;
+      z-index: 100;
+    }
+
+    /* ── Nav Controls ─────────────────────────────────────────── */
+    #nav {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      z-index: 100;
+      background: #0f0f1a99;
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: .4rem .8rem;
+    }
+
+    .nav-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-dim);
+      padding: .4rem .6rem;
+      border-radius: 50%;
+      transition: color .2s, background .2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    .nav-btn:hover { color: var(--text); background: var(--border); }
+    .nav-btn svg { width: 14px; height: 14px; }
+
+    #slide-counter {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .65rem;
+      letter-spacing: .1em;
+      color: var(--text-dim);
+      min-width: 4ch;
+      text-align: center;
+    }
+
+    /* ── Keyboard Hint ────────────────────────────────────────── */
+    #key-hint {
+      position: fixed;
+      top: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .55rem;
+      letter-spacing: .15em;
+      color: var(--text-dim);
+      z-index: 100;
+      opacity: .5;
+      pointer-events: none;
+    }
+
+    /* ── Responsive ───────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .grid-2 { grid-template-columns: 1fr; gap: 1rem; }
+      .grid-3 { grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .timeline::before { left: 3.5rem; }
+      .tl-item { grid-template-columns: 3.5rem 1fr; gap: 1rem; }
+      .tl-time { font-size: .55rem; }
+      .deco-line { display: none; }
+      #slide-1 .bg-text { font-size: 5rem; }
+      .slide { padding: 2.5rem 1.5rem; }
+      #slide-1 { padding-bottom: 4rem; }
+      #nav { gap: .6rem; }
+    }
+
+    @media (max-width: 480px) {
+      .grid-3 { grid-template-columns: 1fr; }
+      .title-xl { font-size: 1.9rem; }
+      .title-lg { font-size: 1.5rem; }
+    }
+
+    /* ── Entrance animations ──────────────────────────────────── */
+    .slide.active .eyebrow  { animation: fadeUp .5s .05s both; }
+    .slide.active .rule     { animation: fadeUp .5s .1s both; }
+    .slide.active .title-xl,
+    .slide.active .title-lg,
+    .slide.active .title-md { animation: fadeUp .5s .15s both; }
+    .slide.active .subtitle { animation: fadeUp .5s .25s both; }
+    .slide.active .body-text{ animation: fadeUp .5s .3s both; }
+    .slide.active .highlight-box { animation: fadeUp .5s .3s both; }
+    .slide.active .grid-2   { animation: fadeUp .5s .2s both; }
+    .slide.active .grid-3   { animation: fadeUp .5s .2s both; }
+    .slide.active .styled-list { animation: fadeUp .5s .25s both; }
+    .slide.active .timeline { animation: fadeUp .5s .2s both; }
+    .slide.active .quote-block { animation: fadeUp .5s .2s both; }
+    .slide.active .stat-block  { animation: fadeUp .5s .2s both; }
+    .slide.active .meta-row    { animation: fadeUp .5s .35s both; }
+    .slide.active .code-block  { animation: fadeUp .5s .3s both; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<div id="progress"></div>
+<div id="key-hint">← → 鍵盤切換 · 滑動切換</div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 1 — TITLE
+════════════════════════════════════════════ -->
+<div id="deck">
+  <div class="slide active" id="slide-1">
+    <div class="bg-text">AI</div>
+    <div class="deco-line"></div>
+
+    <p class="eyebrow">2026 工作坊 · 演講</p>
+    <hr class="rule" />
+    <h1 class="title-xl">
+      從需求探討<br/>到專案落地<br/>
+      <span class="accent">AI 全程的<br/>代理助攻</span>
+    </h1>
+    <p class="subtitle">一個人也能是一支團隊——<br/>當 AI Agent 成為你的協作夥伴</p>
+
+    <div class="meta-row">
+      <div class="speaker-card">
+        <div class="speaker-name">黃瀚霆</div>
+        <div class="speaker-role">使用者體驗工程師</div>
+        <div class="speaker-org">秦毅數位科技有限公司</div>
+        <div class="speaker-bio">專注於程式開發與使用者體驗的整合</div>
+      </div>
+      <div class="meta-tags">
+        <span class="meta-tag">60 min</span>
+        <span class="meta-tag">Workshop</span>
+        <span class="meta-tag" style="color:var(--cyan); border-color:var(--cyan-dim);">2026.04.11</span>
+      </div>
+    </div>
+    <div class="slide-num">01 / 10</div>
+  </div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 2 — AGENDA
+════════════════════════════════════════════ -->
+  <div class="slide" id="slide-2">
+    <div class="deco-line"></div>
+    <p class="eyebrow">今日議程</p>
+    <hr class="rule" />
+    <h2 class="title-lg">這一小時，<br/><span class="accent">我們聊什麼</span></h2>
+    <div class="timeline" style="margin-top:1.5rem">
+      <div class="tl-item">
+        <div class="tl-time">00:00</div>
+        <div class="tl-content">
+          <div class="tl-title">開場 · 為什麼 AI 代理正在改變工作流程</div>
+          <div class="tl-body">從痛點出發，設定討論框架</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-time">00:10</div>
+        <div class="tl-content">
+          <div class="tl-title">需求探討階段：讓 AI 成為你的 PM</div>
+          <div class="tl-body">如何與 AI 協作梳理模糊需求</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-time">00:25</div>
+        <div class="tl-content">
+          <div class="tl-title">開發階段：AI 的角色分配</div>
+          <div class="tl-body">架構師、工程師、QA 一手包辦</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-time">00:40</div>
+        <div class="tl-content">
+          <div class="tl-title">落地與維運：持續協作的閉環</div>
+          <div class="tl-body">部署、監控、迭代的 AI 輔助策略</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-time">00:50</div>
+        <div class="tl-content">
+          <div class="tl-title">Q&A · 實際案例討論</div>
+          <div class="tl-body">帶著你的問題，一起拆解</div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-num">02 / 10</div>
+  </div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 3 — PROBLEM STATEMENT
+════════════════════════════════════════════ -->
+  <div class="slide" id="slide-3">
+    <div class="deco-line"></div>
+    <p class="eyebrow">問題設定</p>
+    <hr class="rule" />
+    <h2 class="title-lg">你是否也遇過這些<br/><span class="accent">開發現場的困境</span></h2>
+    <ul class="styled-list" style="margin-top:1.5rem; max-width:700px">
+      <li>需求一直改，文件永遠落後於現實</li>
+      <li>跨職能溝通成本高，對齊一次就要半天</li>
+      <li>一個人要同時扮演 PM、工程師、測試員</li>
+      <li>上線後發現重要細節沒有驗證，返工代價龐大</li>
+      <li>好不容易做完，下次換人接手根本不知從何看起</li>
+    </ul>
+    <div class="slide-num">03 / 10</div>
+  </div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 4 — WHAT IS AI AGENT
+════════════════════════════════════════════ -->
+  <div class="slide" id="slide-4">
+    <div class="deco-line"></div>
+    <p class="eyebrow">核心概念</p>
+    <hr class="rule" />
+    <h2 class="title-lg">AI Agent<br/><span class="accent">不只是聊天機器人</span></h2>
+    <p class="subtitle" style="margin-bottom:1.5rem">它能感知、規劃、執行、反思——<br/>形成一個自主工作的閉環。</p>
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-num">01</div>
+        <div class="card-title">感知 Perceive</div>
+        <div class="card-body">讀懂你的需求、程式碼、錯誤訊息與上下文</div>
+      </div>
+      <div class="card amber">
+        <div class="card-num amber">02</div>
+        <div class="card-title">規劃 Plan</div>
+        <div class="card-body">拆解任務、安排優先順序、預測阻礙點</div>
+      </div>
+      <div class="card">
+        <div class="card-num">03</div>
+        <div class="card-title">執行 Act</div>
+        <div class="card-body">呼叫工具、寫程式碼、查文件、自動測試</div>
+      </div>
+    </div>
+    <div class="slide-num">04 / 10</div>
+  </div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 5 — REQUIREMENTS PHASE
+════════════════════════════════════════════ -->
+  <div class="slide" id="slide-5">
+    <div class="deco-line"></div>
+    <p class="eyebrow">第一階段 · 需求探討</p>
+    <hr class="rule" />
+    <h2 class="title-lg">讓 AI 陪你<br/><span class="accent">把模糊變清晰</span></h2>
+    <div class="grid-2" style="margin-top:1.5rem; align-items:start">
+      <div>
+        <div class="highlight-box">
+          <div class="label">做法</div>
+          <p class="body-text">用對話式 prompt 引導 AI 扮演「挑剔的 PM」，不斷追問使用情境、邊界條件與成功指標</p>
+        </div>
+        <div class="highlight-box amber" style="margin-top:1rem">
+          <div class="label">產出</div>
+          <p class="body-text">User Story、驗收條件（AC）、技術可行性初評、風險清單</p>
+        </div>
+      </div>
+      <div class="code-block">
+<span class="comment"># 範例 Prompt 框架</span>
+<span class="key">角色：</span><span class="val">你是一位資深 PM，</span>
+        習慣用 5 Whys 追問需求。
+
+<span class="key">任務：</span><span class="val">幫我將以下模糊需求</span>
+        整理成結構化 User Story：
+
+<span class="comment">「用戶希望可以查詢歷史訂單」</span>
+
+<span class="key">格式：</span>
+  - As a ...
+  - I want to ...
+  - So that ...
+  - AC: Given / When / Then
+      </div>
+    </div>
+    <div class="slide-num">05 / 10</div>
+  </div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 6 — DEVELOPMENT PHASE
+════════════════════════════════════════════ -->
+  <div class="slide" id="slide-6">
+    <div class="deco-line"></div>
+    <p class="eyebrow">第二階段 · 開發執行</p>
+    <hr class="rule" />
+    <h2 class="title-lg">AI 扮演<br/><span class="accent">你的全端工程師</span></h2>
+    <ul class="styled-list" style="margin-top:1.5rem; max-width:700px">
+      <li><strong style="color:var(--text)">架構設計</strong> — 評估技術選型、繪製系統圖、提出 tradeoffs</li>
+      <li><strong style="color:var(--text)">程式生成</strong> — 依 spec 產出可運行的程式碼，不只是片段</li>
+      <li><strong style="color:var(--text)">Code Review</strong> — 自動指出潛在 bug、安全漏洞、效能問題</li>
+      <li><strong style="color:var(--text)">測試撰寫</strong> — 根據 AC 生成單元測試、整合測試</li>
+      <li><strong style="color:var(--text)">文件同步</strong> — 隨程式碼更新自動補全 README / API doc</li>
+    </ul>
+    <div class="slide-num">06 / 10</div>
+  </div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 7 — TOOLS
+════════════════════════════════════════════ -->
+  <div class="slide" id="slide-7">
+    <div class="deco-line"></div>
+    <p class="eyebrow">工具生態</p>
+    <hr class="rule" />
+    <h2 class="title-lg">這一套<br/><span class="accent">工具鏈長什麼樣</span></h2>
+    <div class="grid-3" style="margin-top:1.5rem">
+      <div class="card">
+        <div class="card-title" style="color:var(--cyan)">Claude Code</div>
+        <div class="card-body">直接在 terminal 操作程式碼庫，支援 Agent 模式與 MCP 工具串接</div>
+      </div>
+      <div class="card amber">
+        <div class="card-title" style="color:var(--amber)">Cursor / Windsurf</div>
+        <div class="card-body">IDE 內嵌 AI，有感知整個 repo 上下文的能力</div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--cyan)">MCP Servers</div>
+        <div class="card-body">串接 GitHub、Figma、資料庫、API，讓 AI 有能力「動手做」</div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--cyan)">Notion AI / Linear</div>
+        <div class="card-body">需求管理與任務追蹤，與 AI Agent 雙向同步</div>
+      </div>
+      <div class="card amber">
+        <div class="card-title" style="color:var(--amber)">CI/CD + AI</div>
+        <div class="card-body">PR review bot、自動修 lint、部署前安全掃描</div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--cyan)">Observability</div>
+        <div class="card-body">AI 分析 log、預測異常、自動產出 incident report</div>
+      </div>
+    </div>
+    <div class="slide-num">07 / 10</div>
+  </div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 8 — LANDING & OPS
+════════════════════════════════════════════ -->
+  <div class="slide" id="slide-8">
+    <div class="deco-line"></div>
+    <p class="eyebrow">第三階段 · 落地與維運</p>
+    <hr class="rule" />
+    <h2 class="title-lg">上線不是終點，<br/><span class="accent">是另一個迴圈的起點</span></h2>
+    <div class="grid-2" style="margin-top:1.5rem; align-items:start">
+      <ul class="styled-list">
+        <li>部署腳本由 AI 審核與自動化</li>
+        <li>異常告警時，AI 即時協助 root cause 分析</li>
+        <li>用戶反饋自動彙整成下一輪需求</li>
+        <li>技術債週期性由 AI 掃描並排優先級</li>
+      </ul>
+      <div>
+        <div class="stat-block">
+          <div class="stat-num">3×</div>
+          <div class="stat-label">迭代速度提升（實際案例參考值）</div>
+        </div>
+        <hr class="rule-wide" />
+        <div class="stat-block">
+          <div class="stat-num" style="color:var(--amber)">70%</div>
+          <div class="stat-label">重複性工作可由 AI 代勞</div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-num">08 / 10</div>
+  </div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 9 — KEY TAKEAWAYS
+════════════════════════════════════════════ -->
+  <div class="slide" id="slide-9">
+    <div class="deco-line"></div>
+    <p class="eyebrow">核心帶走</p>
+    <hr class="rule" />
+    <h2 class="title-lg">記住這<span class="accent"> 3 </span>件事</h2>
+    <div class="grid-3" style="margin-top:1.5rem">
+      <div class="card">
+        <div class="card-num">01</div>
+        <div class="card-title">把 AI 當隊友，不是工具</div>
+        <div class="card-body">給予角色、上下文、反饋，而不只是丟問題</div>
+      </div>
+      <div class="card amber">
+        <div class="card-num amber">02</div>
+        <div class="card-title">從需求就開始協作</div>
+        <div class="card-body">越早讓 AI 介入，後期返工成本越低</div>
+      </div>
+      <div class="card">
+        <div class="card-num">03</div>
+        <div class="card-title">閉環思維</div>
+        <div class="card-body">讓每個階段的產出成為下一個階段的輸入</div>
+      </div>
+    </div>
+    <div class="quote-block" style="margin-top:1.5rem">
+      <div class="quote-text">"The best AI collaborator is the one<br/>you've trained to know your context."</div>
+    </div>
+    <div class="slide-num">09 / 10</div>
+  </div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 10 — END / Q&A
+════════════════════════════════════════════ -->
+  <div class="slide" id="slide-10">
+    <div class="bg-text" style="right:auto; left:-5%; top:50%; transform:translateY(-50%); opacity:.03">Q&A</div>
+    <div class="deco-line"></div>
+    <p class="eyebrow">問答 · 討論</p>
+    <hr class="rule" />
+    <h2 class="title-xl" style="font-size:clamp(2.5rem,7vw,5.5rem)">帶著你的<br/><span class="accent">問題來</span></h2>
+    <p class="subtitle" style="margin-top:1rem">沒有問題也沒關係——<br/>我們可以從你的專案場景開始拆解。</p>
+    <div class="meta-row" style="margin-top:2rem; position:relative; z-index:1">
+      <span class="meta-tag" style="color:var(--cyan); border-color:var(--cyan-dim)">@speaker_handle</span>
+      <span class="meta-tag">slide.example.com</span>
+    </div>
+    <div class="slide-num">10 / 10</div>
+  </div>
+
+</div><!-- /deck -->
+
+<!-- ── Navigation ──────────────────────────────────────────────── -->
+<div id="nav">
+  <button class="nav-btn" id="btn-prev" aria-label="上一張">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 18 9 12 15 6"/>
+    </svg>
+  </button>
+  <span id="slide-counter">01 / 10</span>
+  <button class="nav-btn" id="btn-next" aria-label="下一張">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="9 6 15 12 9 18"/>
+    </svg>
+  </button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total  = slides.length;
+  let current  = 0;
+
+  function goTo(n) {
+    if (n < 0 || n >= total) return;
+    slides[current].classList.remove('active');
+    slides[current].classList.add('prev');
+    setTimeout(() => slides[current < n ? current : n + 1]?.classList.remove('prev'), 600);
+
+    const prev = current;
+    current = n;
+
+    slides[current].classList.remove('prev');
+    slides[current].classList.add('active');
+
+    // clean up prev class after transition
+    setTimeout(() => slides[prev].classList.remove('prev'), 600);
+
+    // counter & progress
+    document.getElementById('slide-counter').textContent =
+      String(current + 1).padStart(2,'0') + ' / ' + String(total).padStart(2,'0');
+    document.getElementById('progress').style.width =
+      ((current + 1) / total * 100) + '%';
+  }
+
+  document.getElementById('btn-next').addEventListener('click', () => goTo(current + 1));
+  document.getElementById('btn-prev').addEventListener('click', () => goTo(current - 1));
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') goTo(current + 1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp') goTo(current - 1);
+  });
+
+  // Touch/swipe
+  let touchX = 0;
+  document.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend',   e => {
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 50) dx < 0 ? goTo(current + 1) : goTo(current - 1);
+  }, { passive: true });
+
+  // Init progress
+  document.getElementById('progress').style.width = (1 / total * 100) + '%';
+
+  // Hide key hint after 4s
+  setTimeout(() => document.getElementById('key-hint').style.opacity = 0, 4000);
+</script>
+</body>
+</html>
