@@ -396,6 +396,29 @@
     }
 
     /* ── Code Block ───────────────────────────────────────────── */
+    .qr-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .5rem;
+    }
+    .qr-img {
+      width: clamp(140px, 18vw, 220px);
+      height: clamp(140px, 18vw, 220px);
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      background: #fff;
+      padding: 4px;
+      display: block;
+    }
+    .qr-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .58rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--cyan);
+    }
+
     .figma-link {
       display: inline-flex;
       align-items: center;
@@ -505,6 +528,20 @@
       color: var(--text-mid);
       margin-top: .2rem;
     }
+    #slide-1 .speaker-web {
+      display: inline-flex;
+      align-items: center;
+      gap: .3rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .62rem;
+      letter-spacing: .1em;
+      color: var(--cyan);
+      text-decoration: none;
+      margin-top: .2rem;
+      opacity: .8;
+      transition: opacity .2s;
+    }
+    #slide-1 .speaker-web:hover { opacity: 1; text-decoration: underline; }
     #slide-1 .speaker-bio {
       font-size: .72rem;
       color: var(--text-dim);
@@ -661,9 +698,10 @@
 
     <div class="meta-row">
       <div class="speaker-card">
-        <div class="speaker-name">黃瀚霆</div>
+        <div class="speaker-name">黃瀚霆 Bryant</div>
         <div class="speaker-role">使用者體驗工程師</div>
         <div class="speaker-org">秦毅數位科技有限公司</div>
+        <a href="https://www.71next.com/" target="_blank" rel="noopener" class="speaker-web">71next.com</a>
         <div class="speaker-bio">專注於程式開發與使用者體驗的整合</div>
       </div>
       <div class="meta-tags">
@@ -687,36 +725,36 @@
       <div class="tl-item">
         <div class="tl-time">00:00</div>
         <div class="tl-content">
-          <div class="tl-title">開場 · 為什麼 AI 代理正在改變工作流程</div>
-          <div class="tl-body">從痛點出發，設定討論框架</div>
+          <div class="tl-title">開場 · 你是否也遇過這些開發現場的困境</div>
+          <div class="tl-body">從痛點出發，認識 AI Agent 的角色</div>
         </div>
       </div>
       <div class="tl-item">
         <div class="tl-time">00:10</div>
         <div class="tl-content">
-          <div class="tl-title">需求探討階段：讓 AI 成為你的 PM</div>
-          <div class="tl-body">如何與 AI 協作梳理模糊需求</div>
+          <div class="tl-title">第一階段：需求探討——從原始數據到行為洞察</div>
+          <div class="tl-body">AI 擔任 UX 研究員，逐字稿精煉術、顧客旅程地圖</div>
         </div>
       </div>
       <div class="tl-item">
         <div class="tl-time">00:25</div>
         <div class="tl-content">
-          <div class="tl-title">開發階段：AI 的角色分配</div>
-          <div class="tl-body">架構師、工程師、QA 一手包辦</div>
+          <div class="tl-title">第二階段：核心定義——從需求分析到功能規劃</div>
+          <div class="tl-body">AI 擔任 PM，PRD 生成、功能地圖、架構設計</div>
         </div>
       </div>
       <div class="tl-item">
         <div class="tl-time">00:40</div>
         <div class="tl-content">
-          <div class="tl-title">落地與維運：持續協作的閉環</div>
-          <div class="tl-body">部署、監控、迭代的 AI 輔助策略</div>
+          <div class="tl-title">第三階段：MVP 的快速產出與迭代邏輯</div>
+          <div class="tl-body">AI 擔任全端工程師與 Prototype 設計師，從 Wireframe 到程式生成</div>
         </div>
       </div>
       <div class="tl-item">
         <div class="tl-time">00:50</div>
         <div class="tl-content">
-          <div class="tl-title">Q&A · 實際案例討論</div>
-          <div class="tl-body">帶著你的問題，一起拆解</div>
+          <div class="tl-title">核心帶走 · Q&A</div>
+          <div class="tl-body">3 個關鍵觀念，帶著你的問題一起拆解</div>
         </div>
       </div>
     </div>
@@ -733,9 +771,9 @@
     <h2 class="title-lg">你是否也遇過這些<br/><span class="accent">開發現場的困境</span></h2>
     <ul class="styled-list" style="margin-top:1.5rem; max-width:700px">
       <li>需求一直改，文件永遠落後於現實</li>
-      <li>跨職能溝通成本高，對齊一次就要半天</li>
+      <li>跨職能溝通成本高，介面設計對齊一次就要半天</li>
       <li>一個人要同時扮演 PM、工程師、測試員</li>
-      <li>上線後發現重要細節沒有驗證，返工代價龐大</li>
+      <li>上線後發現重要細節沒有驗證，重工代價龐大</li>
       <li>好不容易做完，下次換人接手根本不知從何看起</li>
     </ul>
     <div class="slide-num">03 / 10</div>
@@ -860,21 +898,70 @@
   </div>
 
 <!-- ═══════════════════════════════════════════
-     SLIDE 7 — DEVELOPMENT PHASE (原第二階段)
+     SLIDE 7 — DEVELOPMENT PHASE
 ════════════════════════════════════════════ -->
   <div class="slide" id="slide-7">
     <div class="deco-line"></div>
     <p class="eyebrow">第三階段 · 開發執行</p>
     <hr class="rule" />
     <h2 class="title-lg">AI 扮演<br/><span class="accent">你的全端工程師</span></h2>
-    <ul class="styled-list" style="margin-top:1.5rem; max-width:700px">
+    <p class="subtitle" style="margin-bottom:1.2rem">MVP 的快速產出與迭代邏輯</p>
+    <ul class="styled-list" style="max-width:700px">
       <li><strong style="color:var(--text)">架構設計</strong> — 評估技術選型、繪製系統圖、提出 tradeoffs</li>
       <li><strong style="color:var(--text)">程式生成</strong> — 依 spec 產出可運行的程式碼，不只是片段</li>
       <li><strong style="color:var(--text)">Code Review</strong> — 自動指出潛在 bug、安全漏洞、效能問題</li>
       <li><strong style="color:var(--text)">測試撰寫</strong> — 根據 AC 生成單元測試、整合測試</li>
       <li><strong style="color:var(--text)">文件同步</strong> — 隨程式碼更新自動補全 README / API doc</li>
     </ul>
-    <div class="slide-num">07 / 10</div>
+    <div class="slide-num">07 / 11</div>
+  </div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 8 — DEVELOPMENT PHASE DETAIL
+════════════════════════════════════════════ -->
+  <div class="slide" id="slide-8">
+    <div class="deco-line"></div>
+    <p class="eyebrow">第三階段 · 開發執行</p>
+    <hr class="rule" />
+    <h2 class="title-lg">不追求完美，<br/>追求<span class="accent">「快」且「準」</span>的落地</h2>
+    <div class="grid-2" style="margin-top:1.2rem; align-items:start">
+      <ul class="styled-list">
+        <li>
+          <div>
+            <strong style="color:var(--text)">從 Storyboard 到 Wireframe</strong><br/>
+            <span style="font-size:.82rem">利用 AI 快速草擬原型介面，驗證流程順暢度</span>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong style="color:var(--text)">MVP 的取捨藝術</strong><br/>
+            <span style="font-size:.82rem">詢問 AI「哪些功能是首版必須的？」以達成最小可行性</span>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong style="color:var(--text)">程式生成</strong><br/>
+            <span style="font-size:.82rem">依 spec 產出可運行的程式碼</span>
+          </div>
+        </li>
+      </ul>
+      <div>
+        <div class="highlight-box" style="margin-bottom:.8rem">
+          <div class="label">快速迭代與反饋迴圈</div>
+          <p class="body-text" style="font-size:.82rem; margin-bottom:.6rem">
+            <strong style="color:var(--text)">模擬測試</strong>——利用 AI 扮演「虛擬 Persona」進行初步可用性測試
+          </p>
+          <p class="body-text" style="font-size:.82rem">
+            <strong style="color:var(--text)">數據驅動</strong>——根據首版投放後的反饋數據，由 AI 生成優化策略建議
+          </p>
+        </div>
+        <div class="highlight-box amber">
+          <div class="label">AI 代理的角色</div>
+          <p class="body-text" style="font-size:.9rem">UI/UX 設計師與 Prototype 工程師</p>
+        </div>
+      </div>
+    </div>
+    <div class="slide-num">08 / 11</div>
   </div>
 
 <!-- ═══════════════════════════════════════════
@@ -904,11 +991,11 @@
         </div>
       </div>
     </div>
-    <div class="slide-num">08 / 10</div>
+    <div class="slide-num">09 / 11</div>
   </div>
 
 <!-- ═══════════════════════════════════════════
-     SLIDE 9 — KEY TAKEAWAYS
+     SLIDE 10 — KEY TAKEAWAYS
 ════════════════════════════════════════════ -->
   <div class="slide" id="slide-9">
     <div class="deco-line"></div>
@@ -924,7 +1011,7 @@
       <div class="card amber">
         <div class="card-num amber">02</div>
         <div class="card-title">從需求就開始協作</div>
-        <div class="card-body">越早讓 AI 介入，後期返工成本越低</div>
+        <div class="card-body">越早讓 AI 介入，後期重工成本越低</div>
       </div>
       <div class="card">
         <div class="card-num">03</div>
@@ -935,11 +1022,11 @@
     <div class="quote-block" style="margin-top:1.5rem">
       <div class="quote-text">"The best AI collaborator is the one<br/>you've trained to know your context."</div>
     </div>
-    <div class="slide-num">09 / 10</div>
+    <div class="slide-num">10 / 11</div>
   </div>
 
 <!-- ═══════════════════════════════════════════
-     SLIDE 10 — END / Q&A
+     SLIDE 11 — END / Q&A
 ════════════════════════════════════════════ -->
   <div class="slide" id="slide-10">
     <div class="bg-text" style="right:auto; left:-5%; top:50%; transform:translateY(-50%); opacity:.03">Q&A</div>
@@ -949,10 +1036,14 @@
     <h2 class="title-xl" style="font-size:clamp(2.5rem,7vw,5.5rem)">帶著你的<br/><span class="accent">問題來</span></h2>
     <p class="subtitle" style="margin-top:1rem">沒有問題也沒關係——<br/>我們可以從你的專案場景開始拆解。</p>
     <div class="meta-row" style="margin-top:2rem; position:relative; z-index:1">
-      <span class="meta-tag" style="color:var(--cyan); border-color:var(--cyan-dim)">@speaker_handle</span>
-      <span class="meta-tag">slide.example.com</span>
+      <span class="meta-tag" style="color:var(--cyan); border-color:var(--cyan-dim)">@speaker</span>
+      <span class="meta-tag">bryant@71next.com</span>
     </div>
-    <div class="slide-num">10 / 10</div>
+    <div class="qr-block" style="position:absolute; right:calc(clamp(2rem,8vw,7rem) + 400px); top:50%; transform:translateY(-50%); z-index:10">
+      <img src="https://qr-official.line.me/gs/M_579mniea_GW.png?oat_content=qr" alt="LINE QR Code" class="qr-img" />
+      <div class="qr-label">加 LINE 聯絡我</div>
+    </div>
+    <div class="slide-num">11 / 11</div>
   </div>
 
 </div><!-- /deck -->
@@ -964,7 +1055,7 @@
       <polyline points="15 18 9 12 15 6"/>
     </svg>
   </button>
-  <span id="slide-counter">01 / 10</span>
+  <span id="slide-counter">01 / 11</span>
   <button class="nav-btn" id="btn-next" aria-label="下一張">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="9 6 15 12 9 18"/>
