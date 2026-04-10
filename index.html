@@ -413,7 +413,7 @@
     }
     .qr-label {
       font-family: 'JetBrains Mono', monospace;
-      font-size: .58rem;
+      font-size: .9rem;
       letter-spacing: .12em;
       text-transform: uppercase;
       color: var(--cyan);
@@ -640,9 +640,28 @@
       .tl-time { font-size: .55rem; }
       .deco-line { display: none; }
       #slide-1 .bg-text { font-size: 5rem; }
-      .slide { padding: 2.5rem 1.5rem; }
-      #slide-1 { padding-bottom: 4rem; }
+      #slide-1 { padding-bottom: 5rem; }
       #nav { gap: .6rem; }
+
+      /* 手機版：讓內容可以捲動 */
+      .slide {
+        padding: 2.5rem 1.5rem 5rem;
+        justify-content: flex-start;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        height: 100%;
+      }
+      /* 避免 slide-num 被內容擋住 */
+      .slide-num {
+        position: sticky;
+        bottom: .5rem;
+        align-self: flex-end;
+        background: var(--bg);
+        padding: .1rem .4rem;
+        border-radius: 4px;
+        margin-top: 1rem;
+      }
     }
 
     @media (max-width: 480px) {
@@ -711,6 +730,10 @@
       </div>
     </div>
     <div class="slide-num">01 / 12</div>
+    <div class="qr-block" style="position:absolute; right:calc(clamp(2rem,5vw,4rem) + 300px); top:50%; transform:translateY(-50%); z-index:10">
+      <img src="qrcode.png" alt="QR Code" class="qr-img" />
+      <div class="qr-label">簡報連結</div>
+    </div>
   </div>
 
 <!-- ═══════════════════════════════════════════
@@ -725,7 +748,7 @@
       <div class="tl-item">
         <div class="tl-time">00:00</div>
         <div class="tl-content">
-          <div class="tl-title">開場 · 你是否也遇過這些開發現場的困境</div>
+          <div class="tl-title">開場 · 你是否也遇過專案不明確的困境</div>
           <div class="tl-body">從痛點出發，認識 AI Agent 的角色</div>
         </div>
       </div>
@@ -758,7 +781,7 @@
         </div>
       </div>
     </div>
-    <div class="slide-num">02 / 10</div>
+    <div class="slide-num">02 / 12</div>
   </div>
 
 <!-- ═══════════════════════════════════════════
@@ -776,7 +799,7 @@
       <li>上線後發現重要細節沒有驗證，重工代價龐大</li>
       <li>好不容易做完，下次換人接手根本不知從何看起</li>
     </ul>
-    <div class="slide-num">03 / 10</div>
+    <div class="slide-num">03 / 12</div>
   </div>
 
 <!-- ═══════════════════════════════════════════
@@ -805,7 +828,7 @@
         <div class="card-body">呼叫工具、寫程式碼、查文件、自動測試</div>
       </div>
     </div>
-    <div class="slide-num">04 / 10</div>
+    <div class="slide-num">04 / 12</div>
   </div>
 
 <!-- ═══════════════════════════════════════════
@@ -847,7 +870,7 @@
         </div>
       </div>
     </div>
-    <div class="slide-num">05 / 10</div>
+    <div class="slide-num">05 / 12</div>
   </div>
 
 <!-- ═══════════════════════════════════════════
@@ -894,7 +917,7 @@
         <p class="body-text" style="font-size:.82rem">將模糊的使用者洞察轉化為可執行的開發規格，讓工程師與設計師有共同的語言</p>
       </div>
     </div>
-    <div class="slide-num">06 / 10</div>
+    <div class="slide-num">06 / 12</div>
   </div>
 
 <!-- ═══════════════════════════════════════════
@@ -928,7 +951,7 @@
       <ul class="styled-list">
         <li>
           <div>
-            <strong style="color:var(--text)">從 Storyboard 到 Wireframe</strong><br/>
+            <strong style="color:var(--text)">從 UserFlow 到 Wireframe</strong><br/>
             <span style="font-size:.82rem">利用 AI 快速草擬原型介面，驗證流程順暢度</span>
           </div>
         </li>
@@ -1053,7 +1076,7 @@
       <div class="card">
         <div class="card-num">03</div>
         <div class="card-title">閉環思維</div>
-        <div class="card-body">讓每個階段的產出成為下一個階段的輸入</div>
+        <div class="card-body">讓每個階段的產出（文件與設計檔）成為下一個階段的輸入</div>
       </div>
     </div>
     <div class="quote-block" style="margin-top:1.5rem">
@@ -1135,12 +1158,19 @@
     if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp') goTo(current - 1);
   });
 
-  // Touch/swipe
-  let touchX = 0;
-  document.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
-  document.addEventListener('touchend',   e => {
+  // Touch/swipe — 水平滑動切頁，垂直滑動保留給捲動
+  let touchX = 0, touchY = 0;
+  document.addEventListener('touchstart', e => {
+    touchX = e.touches[0].clientX;
+    touchY = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchend', e => {
     const dx = e.changedTouches[0].clientX - touchX;
-    if (Math.abs(dx) > 50) dx < 0 ? goTo(current + 1) : goTo(current - 1);
+    const dy = e.changedTouches[0].clientY - touchY;
+    // 只有水平位移明顯大於垂直時才切頁
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      dx < 0 ? goTo(current + 1) : goTo(current - 1);
+    }
   }, { passive: true });
 
   // Init progress
